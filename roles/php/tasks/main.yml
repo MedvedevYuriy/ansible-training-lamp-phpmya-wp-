@@ -1,0 +1,7 @@
+---
+- name: Installing php
+  apt: name=php state=present
+
+- name: Template php.ini config
+  template: src=php.ini.j2 dest=/etc/php/7.0/apache2/php.ini
+

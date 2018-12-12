@@ -1,0 +1,29 @@
+---
+- name: Create directory for 2nd site
+  file: path=/var/www/site2 state=directory
+  register: site2
+
+- name: creater group for 2nd site
+  group: name=www-site2
+
+- name: Create user for 2nd site
+  user: name=www-site2 group=www-site2 home=/var/www/site2/
+
+- name: Upload some usless index.php just for fun
+  template: src=info.php.j2 dest=/var/www/site2/index.php
+
+- name: Create directory for phpmanager
+  file: path=/var/www/site2/KODExplorer state=directory
+  register: phpman
+
+- name: Deploy php file manager
+  unarchive: src=https://github.com/kalcaddle/KODExplorer/archive/master.zip dest=/var/www/site2/KODExplorer remote_src=yes
+  when: phpman.changed
+
+- name: Give that sheety manager all rights((
+  file: path=/var/www/site2/KODExplorer state=directory mode=777 recurse=yes
+
+- name: Change ownership of site directory
+  file: path=/var/www/site2/ owner=www-site2 group=www-site2 state=directory recurse=yes
+  when: site2.changed
+

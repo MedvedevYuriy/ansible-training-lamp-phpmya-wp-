@@ -1,0 +1,21 @@
+---
+- hosts: web
+  vars:
+  vars_files:
+        -  /roles/nginx/vars/default.yml
+        -  /roles/apache/vars/default.yml
+        -  /roles/php/vars/default.yml
+        -  /roles/mysql/vars/default.yml
+  roles:
+        -  nginx
+        -  apache
+        -  php
+        -  mysql
+        -  site1_base
+        -  site1_nginx
+        -  site1_apache
+        -  site1_mysql
+        -  site1_mpa
+        -  site1_wp
+        -  site2
+

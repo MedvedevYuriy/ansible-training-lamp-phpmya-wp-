@@ -1,0 +1,37 @@
+---
+- name: Template nginx config
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify:
+        - restart nginx
+
+- name: Template nginx site1 config
+  template: src=nginx.site1.conf.j2 dest=/etc/nginx/sites-enabled/site1.conf
+  notify:
+        - restart nginx
+
+- name: Template nginx site2 config
+  template: src=nginx.site2.conf.j2 dest=/etc/nginx/sites-enabled/site2.conf
+  notify:
+        - restart nginx
+
+- name: Create group for nginxwork
+  group: name=www-site1
+
+- name: Create user for nginxwork
+  user: name=www-site1 group=www-site1 home=/var/www/site1/
+
+- name: create directory for logs
+  file: path=/var/www/log state=directory
+
+- name: create directory for nginx logs
+  file: path=/var/www/log/nginx state=directory
+  register: nginxlog
+
+- name: create access logfile
+  file: path=/var/www/log/nginx/access.log state=touch owner=www-site1 group=www-site1
+  when: nginxlog.changed
+
+- name: create error logfile
+  file: path=/var/www/log/nginx/error.log state=touch owner=www-site1 group=www-site1
+  when: nginxlog.changed
+

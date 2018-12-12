@@ -1,0 +1,30 @@
+---
+- name: Installing additional modules
+  apt: name=php-mysql state=present
+
+- name: Template Mysql config fyle
+  template: src=my.cnf.j2 dest=/etc/mysql/my.cnf
+  notify:
+        - restart mysql
+
+- name: Create group for mysqlwork
+  group: name=www-site1
+
+- name: Create user for mysqlwork
+  user: name=www-site1 group=www-site1 home=/var/www/site1/
+
+- name: create directory for logs
+  file: path=/var/www/log state=directory
+
+- name: create directory for mysql logs
+  file: path=/var/www/log/mysql state=directory
+  register: mysqllog
+
+- name: create access logfile
+  file: path=/var/www/log/mysql/mysql.log state=touch owner=www-site1 group=www-site1
+  when: mysqllog.changed
+
+- name: create error logfile
+  file: path=/var/www/log/mysql/mysql_error.log state=touch owner=www-site1 group=www-site1
+  when: mysqllog.changed
+

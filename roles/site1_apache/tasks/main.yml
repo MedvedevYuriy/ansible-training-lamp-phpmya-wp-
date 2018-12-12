@@ -1,0 +1,67 @@
+---
+- name: Installing additional modules
+  apt: name={{ item }} state=present
+  with_items:
+          - libapache2-mod-php
+          - libapache2-mpm-itk
+        
+- name: Template apache config
+  template: src=apache2.conf.j2 dest=/etc/apache2/apache2.conf
+  notify:
+          - restart apache
+
+- name: Template ports config
+  template: src=ports.conf.j2 dest=/etc/apache2/ports.conf
+  notify:
+          - restart apache
+
+- name: Template envvars
+  template: src=envvars.j2 dest=/etc/apache2/envvars
+  notify:
+          - restart apache
+
+- name: Template apache site 1 conf
+  template: src=apache.site1.conf.j2 dest=/etc/apache2/sites-enabled/site1.conf
+  notify:
+          - restart apache
+
+- name: Template apache site 2 conf
+  template: src=apache.site2.conf.j2 dest=/etc/apache2/sites-enabled/site2.conf
+  notify:
+          - restart apache
+
+- name: Create group for site1 
+  group: name=www-site1
+
+- name: Create user for site1 
+  user: name=www-site1 group=www-site1 home=/var/www/site1/
+
+- name: create group for site2
+  group: name=www-site2
+
+- name: create user for site2
+  user: name=www-site2 group=www-site2 home=/var/www/site2/
+
+- name: create directory for logs
+  file: path=/var/www/log state=directory
+
+- name: create directory for apache logs
+  file: path=/var/www/log/apache2 state=directory
+  register: apachelog
+
+- name: create access logfile for site1
+  file: path=/var/www/log/apache2/site1_access.log state=touch owner=www-site1 group=www-site1
+  when: apachelog.changed
+
+- name: create error logfile
+  file: path=/var/www/log/apache2/site1_error.log state=touch owner=www-site1 group=www-site1
+  when: apachelog.changed
+
+- name: create access logfile for site2
+  file: path=/var/www/log/apache2/site2_access.log state=touch owner=www-site2 group=www-site2
+  when: apachelog.changed
+
+- name: create error logfile for 2nd site
+  file: path=/var/www/log/apache2/site2_error.log state=touch owner=www-site2 group=www-site2
+  when: apachelog.changed
+
